@@ -13,6 +13,7 @@ origen = (90, ALTO - 30)  # posición del cañón
 balas = []  # cada bala es un dict: x, y, vx, vy
 blancos = [{"x": x, "ancho": 60, "alto": 40} for x in range(350, 850, 90)]
 puntos = 0
+ganaste = False
 
 
 def disparar(angulo):
@@ -21,6 +22,8 @@ def disparar(angulo):
     vy = -POTENCIA * math.sin(rad)
     balas.append({"x": origen[0], "y": origen[1], "vx": vx, "vy": vy})
 
+
+fuente = pygame.font.SysFont(None, 72)
 
 ejecutando = True
 while ejecutando:
@@ -32,7 +35,8 @@ while ejecutando:
             mx, my = pygame.mouse.get_pos()
             angulo = math.degrees(math.atan2(origen[1] - my, mx - origen[0]))
         elif evento.type == pygame.MOUSEBUTTONDOWN:
-            disparar(angulo)
+            if not ganaste:
+                disparar(angulo)
 
     # Física de cada bala
     for b in balas:
@@ -42,6 +46,19 @@ while ejecutando:
         if b["y"] > ALTO - 10:  # rebote en el piso
             b["vy"] *= -0.7
             b["y"] = ALTO - 10
+
+    # Detección de impacto: bala contra blanco
+    for b in balas[:]:
+        for blanco in blancos[:]:
+            if (blanco["x"] <= b["x"] <= blanco["x"] + blanco["ancho"] and
+                    ALTO - 90 <= b["y"] <= ALTO - 90 + blanco["alto"]):
+                blancos.remove(blanco)
+                balas.remove(b)
+                puntos += 10
+                break
+
+    if not blancos:
+        ganaste = True
 
     # Dibujar
     pantalla.fill((25, 25, 45))
@@ -58,6 +75,11 @@ while ejecutando:
     for b in balas:
         pygame.draw.circle(pantalla, (240, 240, 240),
                             (int(b["x"]), int(b["y"])), 8)
+
+    if ganaste:
+        texto = fuente.render("Ganaste", True, (255, 220, 60))
+        rect = texto.get_rect(center=(ANCHO // 2, ALTO // 2))
+        pantalla.blit(texto, rect)
 
     pygame.display.set_caption(f"Cañones - Puntos: {puntos}")
     pygame.display.flip()
