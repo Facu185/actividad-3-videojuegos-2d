@@ -27,16 +27,15 @@ fuente = pygame.font.SysFont(None, 72)
 
 ejecutando = True
 while ejecutando:
-    angulo = 0
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             ejecutando = False
-        elif evento.type == pygame.MOUSEMOTION:
-            mx, my = pygame.mouse.get_pos()
-            angulo = math.degrees(math.atan2(origen[1] - my, mx - origen[0]))
         elif evento.type == pygame.MOUSEBUTTONDOWN:
             if not ganaste:
                 disparar(angulo)
+
+    mx, my = pygame.mouse.get_pos()
+    angulo = math.degrees(math.atan2(origen[1] - my, mx - origen[0]))
 
     # Física de cada bala
     for b in balas:
